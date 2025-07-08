@@ -18,6 +18,7 @@ class UserInDB(UserBase):
     id: str
     hashed_password: str
     profile_pic: Optional[bytes] = None
+    is_admin: bool = False
     comment_count: int = 0
     created_at: datetime = datetime.utcnow()
 

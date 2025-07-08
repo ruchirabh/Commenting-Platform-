@@ -3,13 +3,13 @@ from app.api.users import auth
 from app.api.comments import comments
 from app.logs import messages
 from app.db.mongo import db
+from app.db.init_db import create_initial_admin
 
 app = FastAPI()
 
 print(messages.seperator)
 print(messages.server_start)
 print(messages.seperator)
-
 
 # mongo connection check
 @app.on_event("startup")
@@ -22,6 +22,13 @@ async def startup_db():
     except Exception as e:
         print(messages.mongo_connection_fail, e)
 
+# admin creation
+@app.on_event("startup")
+async def startup_db():
+    await create_initial_admin()
+    print(messages.seperator)
+    print(messages.admin_created)
+    print(messages.seperator)
 
 app.include_router(auth.router, prefix="/user")
-app.include_router(comments.router,prefix="/comments" )
+app.include_router(comments.router, prefix="/comments")

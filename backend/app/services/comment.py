@@ -51,7 +51,7 @@ class CommentService:
     async def get_comment(comment_id: str) -> CommentInDB:
         comment = await db.comments.find_one({"_id": ObjectId(comment_id)})
         if not comment:
-            raise HTTPException(status_code=404, detail="Comment not found")
+            raise HTTPException(status_code=404, detail=messages.comment_not_found)
 
         # Convert MongoDB document to CommentInDB
         comment["id"] = str(comment["_id"])

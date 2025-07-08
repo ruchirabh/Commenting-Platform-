@@ -26,10 +26,20 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+async def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    """Generate JWT token with admin status"""
+
+    user = await db.users.find_one({"_id": ObjectId(data["user_id"])})
+
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
-    to_encode.update({"exp": expire})
+    to_encode.update(
+        {
+            "is_admin": user.get("is_admin", False),
+            "exp": datetime.utcnow()
+            + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)),
+        }
+    )
+
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
@@ -44,7 +54,7 @@ def decode_token(token: str):
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=401,
-        detail= messages.validation_error,
+        detail=messages.validation_error,
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
@@ -54,6 +64,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         return payload
     except JWTError:
         raise credentials_exception
+
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
@@ -65,12 +76,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         payload = decode_token(token)
         if payload is None:
             raise credentials_exception
-        
+
         # Add admin check
         user = await db.users.find_one({"_id": ObjectId(payload["user_id"])})
         if not user:
             raise credentials_exception
-            
+
         payload["is_admin"] = user.get("is_admin", False)
         return payload
     except JWTError:

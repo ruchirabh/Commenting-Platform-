@@ -76,7 +76,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         print(messages.wrong_credentials)
         print(messages.seperator)
         raise HTTPException(status_code=400, detail=messages.wrong_credentials)
-    access_token = create_access_token(
+    access_token = await create_access_token(
         data={
             "sub": user["username"],
             "email": user["email"],
@@ -184,25 +184,21 @@ async def upload_profile_pic(
 async def get_profile_pic(
     user_id: Optional[str] = None, current_user: dict = Depends(get_current_user)
 ):
-    # Convert string ID to ObjectId
     try:
         query_id = ObjectId(user_id) if user_id else ObjectId(current_user["user_id"])
     except:
-        raise HTTPException(status_code=400, detail="Invalid user ID format")
+        raise HTTPException(status_code=400, detail=messages.invalid_user_id)
 
-    # Admin can access any user's picture
     if user_id and not current_user.get("is_admin", False):
-        raise HTTPException(
-            status_code=403, detail="Not authorized to access this resource"
-        )
+        raise HTTPException(status_code=403, detail=messages.authority_error)
 
     user = await db.users.find_one({"_id": query_id}, {"profile_pic": 1})
 
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail=messages.user_not_found)
 
     if "profile_pic" not in user:
-        raise HTTPException(status_code=404, detail="Profile picture not found")
+        raise HTTPException(status_code=404, detail=messages.profile_pic_not_found)
 
     return Response(content=user["profile_pic"], media_type="image/jpeg")
 
@@ -219,8 +215,6 @@ async def delete_profile_pic(current_user: dict = Depends(get_current_user)):
     )
 
     if result.modified_count == 0:
-        raise HTTPException(
-            status_code=404, detail="No profile picture exists to delete"
-        )
+        raise HTTPException(status_code=404, detail=messages.no_profile_pic_to_delete)
 
-    return {"message": "Profile picture removed successfully"}
+    return {"message": messages.removed_profile_pic}

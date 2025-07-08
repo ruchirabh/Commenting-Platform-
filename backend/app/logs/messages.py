@@ -2,10 +2,11 @@
 
 endpoint_hit = " API ENDPOINT HIT "
 seperator = ".........................................................."
-server_start = " BACKEND IS RUNNING "
-mongo_connection = " CONNECTED TO  MONGODB: "
+server_start = " BACKEND IS RUNNING : 👍 "
+mongo_connection = " CONNECTED TO  MONGODB : 👍"
 mongo_connection_fail = " MongoDB connection failed: "
 validation_error = "Could not validate credentials"
+admin_created = "INITIAL ADMIN USER CREATED : 👍"
 # ............................................................................................................................................
 
 """ LOGS FOR USER API'S """
@@ -18,6 +19,7 @@ existing_email = " Email already registered "
 wrong_credentials = " Incorrect username or password "
 unauthorized_action = "Not authorized to perform this action"
 user_not_found = "User not found"
+invalid_user_id = "Invalid user ID format"
 
 # FOR PROFILE PIC
 unsupported_file_type = "Unsupported file type. Allowed types: "
