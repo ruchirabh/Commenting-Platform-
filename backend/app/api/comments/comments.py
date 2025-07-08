@@ -18,10 +18,7 @@ class CommentUpdate(BaseModel):
 
 # ............................................................................................................................................
 
-"""
-API  FOR FETCHING ALL COMMENTS
-
-"""
+"""GET ALL TOP-LEVEL COMMENTS"""
 
 
 @router.get("/", response_model=List[CommentInDB])
@@ -31,20 +28,7 @@ async def get_top_level_comments(limit: int = 10, skip: int = 0):
 
 # ............................................................................................................................................
 
-"""
-API FOR WRITTING A COMMENT
---------------------------
-ENDPOINT = /COMMENTS/
-
-Headers:
-    Authorization: Bearer <access_token>
-
-Example Requests:
-    {  
-        "content": "This is my comment"
-    }
-
-"""
+"""CREATE COMMENT"""
 
 
 @router.post("/", response_model=CommentInDB, status_code=status.HTTP_201_CREATED)
@@ -58,29 +42,7 @@ async def create_comment(
 
 # ............................................................................................................................................
 
-"""
-API FOR UPDATING A COMMENT
-
-EXAMPLE USAGE=
-        http://127.0.0.1:8000/comments/686d0209764b5c8f453da5d6
-
-        {
-            "content": "This is my new comment 12345"
-
-        }
-
-RESULT =    {
-                "content": "This is my new comment 12345",
-                "author_id": "686cd00466aa0a42e1f011b9",
-                "parent_id": null,
-                "id": "686d0209764b5c8f453da5d6",
-                "created_at": "2025-07-08T11:33:29.497000",
-                "updated_at": "2025-07-08T11:49:28.124000",
-                "likes": [],
-                "is_deleted": false,
-                "reply_count": 0
-            }        
-"""
+"""UPDATE COMMENT"""
 
 
 @router.put("/{comment_id}", response_model=CommentInDB)
@@ -94,17 +56,7 @@ async def update_comment(
 
 # ............................................................................................................................................
 
-"""
-API FOR DELETING THE COMMENT 
-
-EXAMPLE = 
-            http://127.0.0.1:8000/comments/686d0e10556006fcfa026174
-
-RESULT = 
-            {
-                "message": "Comment deleted successfully "
-            }
-"""
+"""DELETE COMMENT"""
 
 
 @router.delete("/{comment_id}")
@@ -119,26 +71,7 @@ async def delete_comment(
 
 # ............................................................................................................................................
 
-"""
-API FOR LIKING A COMMENT
-
-EXAMPLE = 
-            http://127.0.0.1:8000/comments/686d0f093a30f3ea0ef293f6/like
-
-RESULT  = {
-            "content": "the comment qqqq  ",
-            "author_id": "686cd00466aa0a42e1f011b9",
-            "parent_id": null,
-            "id": "686d0f093a30f3ea0ef293f6",
-            "created_at": "2025-07-08T12:28:57.140000",
-            "updated_at": null,
-            "likes": [
-                "686cd00466aa0a42e1f011b9"
-            ],
-            "is_deleted": false,
-            "reply_count": 0
-        }           
-"""
+"""LIKE/UNLIKE COMMENT"""
 
 
 @router.post("/{comment_id}/like", response_model=CommentInDB)
@@ -152,7 +85,7 @@ async def toggle_like(comment_id: str, current_user: dict = Depends(get_current_
 
 # ............................................................................................................................................
 
-""" Admin-only endpoint example """
+""" ADMIN HARD DELETE"""
 
 
 @router.delete("/admin/{comment_id}")
@@ -168,11 +101,13 @@ async def admin_delete_comment(
 
 
 # ............................................................................................................................................
-"""
-API TO GET ALL REPLIES FOR A COMMENT
 
-"""
+"""GET COMMENT REPLIES"""
+
 
 @router.get("/{comment_id}/replies", response_model=List[CommentInDB])
 async def get_comment_replies(comment_id: str, limit: int = 10, skip: int = 0):
     return await CommentService.get_comments(comment_id, limit, skip)
+
+
+# ............................................................................................................................................

@@ -35,23 +35,12 @@ class ResetPasswordRequest(BaseModel):
 
 ALLOWED_FILE_TYPES = ["image/jpeg", "image/png"]
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+
 # ............................................................................................................................................
 
-"""
-USER REGISTRATION API
----------------------
-Endpoint: POST /user/signup
-Description: Registers a new user in the system.
+"""USER REGISTRATION"""
 
-Example Request:
 
-    {
-        "username": "user1",
-        "email": "user@example.com",
-        "password": "yourStrongPassword"
-    }
-
-"""
 @router.post("/signup")
 async def signup(user: UserCreate):
     if await db.users.find_one({"email": user.email}):
@@ -75,30 +64,9 @@ async def signup(user: UserCreate):
 
 # ............................................................................................................................................
 
-"""
-USER LOGIN API
----------------------
-Endpoint: POST /user/login
-Description: Authenticates an existing user and returns an access token.
+"""USER LOGIN"""
 
-Content-Type: application/x-www-form-urlencoded
 
-Example Request (Form Data):
-    username: veera
-    password: yourStrongPassword
-
-Responses:
-- 200 OK: Returns access token and user data
-    {
-        "access_token": "eyJhbGciOi...",
-        "token_type": "bearer",
-        "user": {
-            "username": "veera",
-            "email": "veera@example.com"
-        }
-    }
-
-"""
 @router.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = await db.users.find_one({"username": form_data.username})
@@ -120,7 +88,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user_data = dict(user)
     user_data["_id"] = str(user_data["_id"])
     del user_data["hashed_password"]
-    user_data.pop("profile_pic", None)  
+    user_data.pop("profile_pic", None)
 
     print(messages.seperator)
     print(messages.successfull_login, user_data)
@@ -135,13 +103,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 # ............................................................................................................................................
 
-"""
-API FOR IDENTIFY CURRENT USER
----------------------
-
-Authorization: Bearer <access_token>
-
-"""
+"""GET CURRENT USER"""
 
 
 @router.get("/me")
@@ -151,30 +113,7 @@ async def read_current_user(current_user: dict = Depends(get_current_user)):
 
 # ............................................................................................................................................
 
-"""
-PASSWORD RESET API
----------------------
-Endpoint: POST /reset-password
-Description: Allows users to reset their password by providing their email and new password.
-
-Request Headers:
-    Content-Type: application/json
-    Authorization: Bearer <token> (optional, if protected endpoint)
-
-Example Request:
-    {
-        "email": "veera@example.com",
-        "new_password": "newStrongPassword"
-    }
-
-Responses:
-- 200 OK: Password reset successful
-    {
-        "message": "Password updated successfully",
-        
-    }
-
-"""
+"""PASSWORD RESET"""
 
 
 @router.post("/reset-password")
@@ -200,36 +139,7 @@ async def reset_password(request: ResetPasswordRequest):
 
 # ............................................................................................................................................
 
-"""
-PROFILE PICTURE API
-===================
-
-1. UPLOAD PROFILE PICTURE
--------------------------
-Endpoint: POST /profile-pic
-Description: Uploads or updates user's profile picture with validation
-
-Headers:
-    Authorization: Bearer <access_token>
-    Content-Type: multipart/form-data
-
-Request Body (form-data):
-    Key: file
-    Type: File (JPEG/PNG/GIF)
-    Size: < 5MB
-
-Example cURL:
-    curl -X POST \
-      -H "Authorization: Bearer YOUR_TOKEN" \
-      -F "file=@profile.jpg" \
-      http://localhost:8000/profile-pic
-
-Responses:
-- 200 Success:
-    {
-        "message": "Profile picture updated successfully"
-    }
-"""
+"""UPLOAD PROFILE PICTURE"""
 
 
 @router.post("/profile-pic")
@@ -258,36 +168,21 @@ async def upload_profile_pic(
     # Store in MongoDB
     encoded_image = Binary(contents)
     await db.users.update_one(
-    {"_id": ObjectId(current_user["user_id"])}, 
-    {"$set": {"profile_pic": encoded_image}}
-)
+        {"_id": ObjectId(current_user["user_id"])},
+        {"$set": {"profile_pic": encoded_image}},
+    )
 
     return {"message": messages.profile_pic_updated_success}
 
 
 # ............................................................................................................................................
 
-"""
- GET PROFILE PICTURE
-----------------------
-Endpoint: GET /profile-pic
-Description: Retrieves profile picture for specified user or current user
+"""GET PROFILE PICTURE"""
 
-Headers:
-    Authorization: Bearer <access_token>
 
-Query Parameters:
-    user_id: str (optional) - ID of user to fetch picture for
-
-Example Requests:
-    http://localhost:8000/user/profile-pic
-    http://localhost:8000/user/profile-pic?user_id=507f1f77bcf86cd799439011
-
-"""
 @router.get("/profile-pic")
 async def get_profile_pic(
-    user_id: Optional[str] = None, 
-    current_user: dict = Depends(get_current_user)
+    user_id: Optional[str] = None, current_user: dict = Depends(get_current_user)
 ):
     # Convert string ID to ObjectId
     try:
@@ -297,12 +192,11 @@ async def get_profile_pic(
 
     # Admin can access any user's picture
     if user_id and not current_user.get("is_admin", False):
-        raise HTTPException(status_code=403, detail="Not authorized to access this resource")
+        raise HTTPException(
+            status_code=403, detail="Not authorized to access this resource"
+        )
 
-    user = await db.users.find_one(
-        {"_id": query_id}, 
-        {"profile_pic": 1}
-    )
+    user = await db.users.find_one({"_id": query_id}, {"profile_pic": 1})
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -310,40 +204,23 @@ async def get_profile_pic(
     if "profile_pic" not in user:
         raise HTTPException(status_code=404, detail="Profile picture not found")
 
-    return Response(
-        content=user["profile_pic"], 
-        media_type="image/jpeg"
-    )
+    return Response(content=user["profile_pic"], media_type="image/jpeg")
+
 
 # ............................................................................................................................................
 
-"""
-DELETE PROFILE PICTURE
--------------------------
-Endpoint: DELETE /profile-pic
-Description: Removes the profile picture for current user
+"""DELETE PROFILE PICTURE"""
 
-Headers:
-    Authorization: Bearer <access_token>
 
-Example cURL:
-    curl -X DELETE \
-      -H "Authorization: Bearer YOUR_TOKEN" \
-      http://localhost:8000/profile-pic
-"""
 @router.delete("/profile-pic")
-async def delete_profile_pic(
-    current_user: dict = Depends(get_current_user)
-):
+async def delete_profile_pic(current_user: dict = Depends(get_current_user)):
     result = await db.users.update_one(
-        {"_id": ObjectId(current_user["user_id"])}, 
-        {"$unset": {"profile_pic": ""}}
+        {"_id": ObjectId(current_user["user_id"])}, {"$unset": {"profile_pic": ""}}
     )
 
     if result.modified_count == 0:
         raise HTTPException(
-            status_code=404,
-            detail="No profile picture exists to delete"
+            status_code=404, detail="No profile picture exists to delete"
         )
 
     return {"message": "Profile picture removed successfully"}
