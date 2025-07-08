@@ -13,33 +13,76 @@ class CommentService:
 
     @staticmethod
     async def create_comment(comment: CommentCreate, user_id: str) -> CommentInDB:
-        comment_dict = comment.dict()
-        comment_dict["author_id"] = user_id
+        comment_dict = {
+            "content": comment.content,
+            "author_id": user_id,
+            "parent_id": ObjectId(comment.parent_id) if comment.parent_id else None,
+            "reply_count": 0,
+            "likes": [],
+            "is_deleted": False,
+            "created_at": datetime.utcnow(),
+        }
+
         result = await db.comments.insert_one(comment_dict)
 
+        # If this is a reply, increment parent's reply_count
+        if comment.parent_id:
+            await db.comments.update_one(
+                {"_id": ObjectId(comment.parent_id)}, {"$inc": {"reply_count": 1}}
+            )
+
+        # Update user's comment count
         await db.users.update_one(
             {"_id": ObjectId(user_id)}, {"$inc": {"comment_count": 1}}
         )
 
+        created_comment = await db.comments.find_one({"_id": result.inserted_id})
+        created_comment["id"] = str(created_comment["_id"])
+        del created_comment["_id"]
+        if created_comment.get("parent_id"):
+            created_comment["parent_id"] = str(created_comment["parent_id"])
         print(messages.seperator)
-        print(messages.comment_created, result)
+        print(messages.comment_created, created_comment)
         print(messages.seperator)
-
-        return await CommentService.get_comment(str(result.inserted_id))
+        return CommentInDB(**created_comment)
 
     # ............................................................................................................................................
-
     @staticmethod
     async def get_comment(comment_id: str) -> CommentInDB:
         comment = await db.comments.find_one({"_id": ObjectId(comment_id)})
         if not comment:
-            raise HTTPException(status_code=404, detail=messages.comment_not_found)
+            raise HTTPException(status_code=404, detail="Comment not found")
 
-        print(messages.seperator)
-        print(messages.comment_retrived, comment)
-        print(messages.seperator)
+        # Convert MongoDB document to CommentInDB
+        comment["id"] = str(comment["_id"])
+        del comment["_id"]
+        if comment.get("parent_id"):
+            comment["parent_id"] = str(comment["parent_id"])
 
-        return CommentInDB(**comment, id=str(comment["_id"]))
+        return CommentInDB(**comment)
+
+    # ............................................................................................................................................
+    @staticmethod
+    async def get_comments(
+        parent_id: Optional[str] = None, limit: int = 10, skip: int = 0
+    ) -> List[CommentInDB]:
+        query = {"is_deleted": False}
+        if parent_id:
+            query["parent_id"] = ObjectId(parent_id)
+        else:
+            query["parent_id"] = None
+
+        comments = await db.comments.find(query).skip(skip).limit(limit).to_list(None)
+
+        processed_comments = []
+        for comment in comments:
+            comment["id"] = str(comment["_id"])
+            del comment["_id"]
+            if comment.get("parent_id"):
+                comment["parent_id"] = str(comment["parent_id"])
+            processed_comments.append(CommentInDB(**comment))
+
+        return processed_comments
 
     # ............................................................................................................................................
 
@@ -56,7 +99,7 @@ class CommentService:
             {"$set": {"content": content, "updated_at": datetime.utcnow()}},
         )
         print(messages.seperator)
-        print(messages.comment_update, content)
+        print(messages.comment_update, comment)
         print(messages.seperator)
         return await CommentService.get_comment(comment_id)
 
@@ -122,7 +165,6 @@ class CommentService:
             print(messages.seperator)
             print(f"User {user_id} unliked comment {comment_id}")
             print(messages.seperator)
-
         else:
             await db.comments.update_one(
                 {"_id": ObjectId(comment_id)}, {"$addToSet": {"likes": user_id}}
@@ -130,6 +172,7 @@ class CommentService:
             print(messages.seperator)
             print(f"User {user_id} liked comment {comment_id}")
             print(messages.seperator)
+
         return await CommentService.get_comment(comment_id)
 
     # ............................................................................................................................................
