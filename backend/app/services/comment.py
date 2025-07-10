@@ -13,9 +13,12 @@ class CommentService:
 
     @staticmethod
     async def create_comment(comment: CommentCreate, user_id: str) -> CommentInDB:
+        user = await db.users.find_one({"_id": ObjectId(user_id)}, {"username": 1})
+        username = user["username"] if user else "Anonymous"
         comment_dict = {
             "content": comment.content,
             "author_id": user_id,
+            "username": username,
             "parent_id": ObjectId(comment.parent_id) if comment.parent_id else None,
             "reply_count": 0,
             "likes": [],

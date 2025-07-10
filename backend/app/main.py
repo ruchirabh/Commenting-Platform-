@@ -4,8 +4,16 @@ from app.api.comments import comments
 from app.logs import messages
 from app.db.mongo import db
 from app.db.init_db import create_initial_admin
-
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # For development only, restrict in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 print(messages.seperator)
 print(messages.server_start)

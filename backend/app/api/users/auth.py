@@ -182,15 +182,13 @@ async def upload_profile_pic(
 
 @router.get("/profile-pic")
 async def get_profile_pic(
-    user_id: Optional[str] = None, current_user: dict = Depends(get_current_user)
+    user_id: Optional[str] = None, 
+    current_user: dict = Depends(get_current_user)
 ):
     try:
         query_id = ObjectId(user_id) if user_id else ObjectId(current_user["user_id"])
     except:
         raise HTTPException(status_code=400, detail=messages.invalid_user_id)
-
-    if user_id and not current_user.get("is_admin", False):
-        raise HTTPException(status_code=403, detail=messages.authority_error)
 
     user = await db.users.find_one({"_id": query_id}, {"profile_pic": 1})
 

@@ -20,6 +20,7 @@ class CommentInDB(CommentBase):
     likes: List[str] = [] 
     is_deleted: bool = False
     reply_count: int = 0  
+    username: Optional[str] = None
     
     class Config:
         from_attributes = True
