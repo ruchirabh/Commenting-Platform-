@@ -55,7 +55,7 @@ export class Auth {
       
     return this.http.get(url, {
       responseType: 'blob',
-      headers: this.getAuthHeaders()  // Include auth headers
+      headers: this.getAuthHeaders()  
     });
   }
 

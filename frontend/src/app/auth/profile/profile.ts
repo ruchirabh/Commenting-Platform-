@@ -106,7 +106,7 @@ export class ProfileComponent implements OnInit {
         this.successMessage = 'Profile picture updated successfully';
         this.selectedFile = null;
         this.isLoading = false;
-        // Reload the profile picture
+        
         this.loadProfilePicture();
       },
       error: (err) => {
