@@ -1,13 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormsModule,
-  ReactiveFormsModule,
-  FormBuilder,
-  FormGroup,
-  Validators,
-  AbstractControl,
-} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { Auth } from '../auth';
 
@@ -49,7 +42,6 @@ export class SignupComponent implements OnInit {
 
   ngOnInit() {
     window.history.pushState(null, '', window.location.href);
-
     window.addEventListener('popstate', () => {
       window.history.pushState(null, '', window.location.href);
     });
@@ -57,9 +49,7 @@ export class SignupComponent implements OnInit {
 
   strongPasswordValidator(control: AbstractControl) {
     const value = control.value || '';
-    const strongPasswordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&^()_+=-])[A-Za-z\d@$!%*?#&^()_+=-]{8,}$/;
-
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&^()_+=-])[A-Za-z\d@$!%*?#&^()_+=-]{8,}$/;
     return strongPasswordRegex.test(value) ? null : { weakPassword: true };
   }
 
@@ -84,27 +74,22 @@ export class SignupComponent implements OnInit {
     this.authService.signup(payload).subscribe({
       next: (response) => {
         this.successMessage = 'Signup successful! Redirecting to login...';
-
         window.removeEventListener('popstate', () => {});
 
         setTimeout(() => {
-          this.router
-            .navigate(['/login'], {
-              replaceUrl: true,
-            })
+          this.router.navigate(['/login'], { replaceUrl: true })
             .then(() => {
               window.history.pushState(null, '', window.location.href);
             });
         }, 2000);
       },
       error: (error) => {
-        this.errorMessage =
-          error.error?.message || 'Signup failed. Please try again.';
-        console.error('Signup error:', error);
+        this.errorMessage = error.error?.message || 'Signup failed. Please try again.';
+        this.isLoading = false;
       },
       complete: () => {
         this.isLoading = false;
-      },
+      }
     });
   }
 
