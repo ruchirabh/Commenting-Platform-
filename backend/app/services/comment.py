@@ -67,15 +67,24 @@ class CommentService:
     # ............................................................................................................................................
     @staticmethod
     async def get_comments(
-        parent_id: Optional[str] = None, limit: int = 10, skip: int = 0
-    ) -> List[CommentInDB]:
+    parent_id: Optional[str] = None,
+    limit: int = 10,
+    skip: int = 0
+) -> List[CommentInDB]:
         query = {"is_deleted": False}
         if parent_id:
             query["parent_id"] = ObjectId(parent_id)
         else:
             query["parent_id"] = None
 
-        comments = await db.comments.find(query).skip(skip).limit(limit).to_list(None)
+        # Sort by created_at in descending order (newest first)
+        comments = (
+            await db.comments.find(query)
+            .sort("created_at", -1)  # -1 = descending order
+            .skip(skip)
+            .limit(limit)
+            .to_list(None)
+        )
 
         processed_comments = []
         for comment in comments:
