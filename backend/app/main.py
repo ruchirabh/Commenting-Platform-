@@ -9,7 +9,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For production, replace "*" with your Vercel frontend URL
+    allow_origins=[" https://commenting-platform-3.onrender.com "], 
     allow_methods=["*"],
     allow_headers=["*"],
 )
