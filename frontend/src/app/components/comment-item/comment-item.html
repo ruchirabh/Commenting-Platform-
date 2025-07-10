@@ -1,40 +1,36 @@
 <div class="comment-container bg-amber-50">
   <div class="flex flex-col sm:flex-row gap-4">
     <!-- Profile Image -->
-    <div class="profile-image-container">
-      <img [src]="profileImage" alt="Profile" class="profile-image" />
-      <div
-        class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white"
-      ></div>
-    </div>
+   
 
     <!-- Comment Content -->
     <div class="flex-1 min-w-0">
       <!-- Header -->
-      <div class="comment-header flex justify-between items-start">
-        <div class="flex flex-wrap items-center gap-2">
-          <h4 class="text-sm font-semibold text-gray-900">
+      <div class="comment-header">
+        <div class="user-info">
+ <div class="profile-image-container">
+      <img [src]="profileImage" alt="Profile" class="profile-image" />
+      <div class="online-dot"></div>
+    </div>
+          <h4 class="username">
             {{ comment.username || "Anonymous" }}
           </h4>
-          <span
-            *ngIf="isUsersComment"
-            class="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded-full"
-          >
+          <span *ngIf="isUsersComment" class="user-badge">
             You
           </span>
         </div>
-        <span class="text-xs text-gray-500">
-          {{ comment.created_at | date : "mediumDate" }}
+        <span class="comment-date">
+          {{ getTimeAgo(comment.created_at) }}
         </span>
       </div>
 
       <!-- Comment Text -->
-      <div class="mb-3">
-        <p class="text-gray-800 font-bold text-sm">{{ comment.content }}</p>
+      <div class="comment-text">
+        <p>{{ comment.content }}</p>
       </div>
 
       <!-- Action Buttons -->
-      <div class="comment-actions text-xs">
+      <div class="comment-actions">
         <!-- Like Button -->
         <button
           (click)="toggleLike()"
@@ -43,12 +39,8 @@
           [class.text-indigo-600]="isLiked"
           [class.text-gray-500]="!isLiked"
         >
-          <span class="relative">
-            <span class="text-lg" [class.animate-like-pulse]="likeAnimation"
-              >👍</span
-            >
-          </span>
-          <span>{{ comment.likes?.length || 0 }}</span>
+          <span class="like-icon" [class.animate-like-pulse]="likeAnimation">👍</span>
+          <span class="like-count">{{ comment.likes?.length || 0 }}</span>
         </button>
 
         <!-- Reply Button -->
@@ -56,18 +48,8 @@
           (click)="toggleReplyForm()"
           class="action-button text-gray-500 hover:text-indigo-600"
         >
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
-            ></path>
+          <svg class="reply-icon" viewBox="0 0 24 24">
+            <path d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
           </svg>
           <span>{{ showReplyForm ? "Cancel" : "Reply" }}</span>
         </button>
@@ -78,18 +60,8 @@
           (click)="deleteComment()"
           class="action-button text-red-500 hover:text-red-700"
         >
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-            ></path>
+          <svg class="delete-icon" viewBox="0 0 24 24">
+            <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
           </svg>
           <span>Delete</span>
         </button>
@@ -99,56 +71,31 @@
           (click)="toggleReplies()"
           class="action-button text-gray-500 hover:text-indigo-600"
         >
-          <svg
-            class="w-4 h-4 transition-transform"
-            [class.rotate-180]="showReplies"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 9l-7 7-7-7"
-            ></path>
+          <svg class="replies-icon" [class.rotate-180]="showReplies" viewBox="0 0 24 24">
+            <path d="M19 9l-7 7-7-7"></path>
           </svg>
           <span>{{ showReplies ? "Hide" : "Show" }} replies</span>
-          <span
-            *ngIf="comment.reply_count > 0"
-            class="text-xs px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-full"
-          >
+          <span *ngIf="comment.reply_count > 0" class="reply-count">
             {{ comment.reply_count }}
           </span>
         </button>
       </div>
 
       <!-- Reply Form -->
-      <div *ngIf="showReplyForm" class="reply-form-container animate-fade-in">
+      <div *ngIf="showReplyForm" class="reply-form-container">
         <app-comment-form
           [parentId]="comment.id"
           (commentAdded)="onReplyAdded()"
-        >
-        </app-comment-form>
+        ></app-comment-form>
       </div>
 
       <!-- Replies Section -->
       <div *ngIf="showReplies" class="replies-container">
-        <!-- Loading State -->
-        <div *ngIf="loadingReplies" class="flex justify-center py-4">
-          <div class="loading-spinner w-6 h-6 rounded-full"></div>
-        </div>
-
-        <!-- Empty State -->
-        <div
-          *ngIf="!loadingReplies && replies.length === 0"
-          class="text-center py-4 text-gray-500 text-sm"
-        >
+        <div *ngIf="loadingReplies" class="loading-spinner"></div>
+        <div *ngIf="!loadingReplies && replies.length === 0" class="no-replies">
           No replies yet
         </div>
-
-        <!-- Replies List -->
-        <div *ngFor="let reply of replies" class="animate-fade-in">
+        <div *ngFor="let reply of replies">
           <app-comment-item [comment]="reply"></app-comment-item>
         </div>
       </div>
