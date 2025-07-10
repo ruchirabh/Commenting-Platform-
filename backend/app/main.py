@@ -9,7 +9,11 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[" https://commenting-platform-3.onrender.com "], 
+    allow_origins=[
+        "https://commenting-app-bice.vercel.app",  
+        "http://localhost:4200"                    
+    ],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
