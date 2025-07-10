@@ -1,12 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormsModule,
-  ReactiveFormsModule,
-  FormBuilder,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { Auth } from '../auth';
 
@@ -35,7 +29,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/feed']);
     }
 
     window.history.pushState(null, '', window.location.href);
@@ -58,16 +52,11 @@ export class LoginComponent implements OnInit {
       next: (response) => {
         localStorage.setItem('token', response.access_token);
         localStorage.setItem('user', JSON.stringify(response.user));
-
         window.removeEventListener('popstate', () => {});
-
         this.router.navigate(['/feed'], { replaceUrl: true });
       },
       error: (error) => {
-        this.errorMessage =
-          error.error?.message ||
-          'Login failed. Please check your credentials.';
-        console.error('Login error:', error);
+        this.errorMessage = error.error?.message || 'Login failed. Please check your credentials.';
         this.isLoading = false;
       },
     });
