@@ -1,4 +1,4 @@
-import { environment } from '../../environment/environment.development';
+import { environment } from '../../../src/environment/environment';
 
 export const API_CONFIG = {
   USER: {
