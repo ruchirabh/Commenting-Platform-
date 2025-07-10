@@ -1,0 +1,132 @@
+/* Profile image styling with performance optimization */
+.profile-image-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.profile-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+  /* Optimize for performance */
+  image-rendering: optimizeQuality;
+  /* Prevent layout shifts */
+  aspect-ratio: 1;
+  /* Smooth loading */
+  transition: opacity 0.2s ease;
+}
+
+/* Loading state for images */
+.profile-image[src=""] {
+  opacity: 0.5;
+  background-color: #f3f4f6;
+}
+
+/* Comment container styling */
+.comment-container {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+}
+
+.comment-container:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-color: #d1d5db;
+}
+
+/* Action buttons */
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
+
+.action-button:hover {
+  background-color: #f3f4f6;
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Like animation */
+@keyframes like-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.animate-like-pulse {
+  animation: like-pulse 0.6s ease-in-out;
+}
+
+/* Reply form animation */
+.reply-form-container {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Replies container */
+.replies-container {
+  margin-top: 1rem;
+  padding-left: 1rem;
+  border-left: 2px solid #e5e7eb;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  border: 2px solid #f3f4f6;
+  border-top: 2px solid #3b82f6;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .comment-container {
+    padding: 0.75rem;
+  }
+  
+  .profile-image {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .action-button {
+    padding: 0.125rem 0.25rem;
+    font-size: 0.625rem;
+  }
+  
+button[class*="text-red-500"] {
+  background-color: yellow !important; /* Temporary debug style */
+}
+
+}

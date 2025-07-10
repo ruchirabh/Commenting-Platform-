@@ -1,0 +1,23 @@
+
+<app-navbar></app-navbar>
+
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <!-- Comment form (shown when showCommentForm is true) -->
+  <div *ngIf="showCommentForm" class="mb-8">
+    <app-comment-form (commentAdded)="onCommentAdded()"></app-comment-form>
+  </div>
+
+  <!-- Comments list -->
+  <div *ngIf="isLoading" class="text-center py-8">
+    Loading comments...
+  </div>
+
+  <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+    {{ error }}
+  </div>
+
+  <app-comment-list *ngIf="!isLoading" [comments]="comments"></app-comment-list>
+</div>
+
+<!-- Floating action button -->
+<app-floating-action-button (toggleForm)="toggleCommentForm()"></app-floating-action-button>

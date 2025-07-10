@@ -1,0 +1,143 @@
+<!-- profile.component.html -->
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-12 px-4">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Profile Settings</h1>
+      <p class="text-gray-600">Manage your account information and preferences</p>
+    </div>
+
+    <!-- Main Profile Card -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden backdrop-blur-sm bg-opacity-95">
+      <!-- Cover Section -->
+      <div class="h-32 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 relative">
+        <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black to-transparent opacity-30"></div>
+      </div>
+
+      <!-- Profile Content -->
+      <div class="relative px-8 pb-8">
+        <!-- Profile Picture Section -->
+        <div class="flex flex-col items-center -mt-16 mb-6">
+          <div class="relative group">
+            <div class="w-32 h-32 rounded-full ring-4 ring-white shadow-2xl overflow-hidden bg-white">
+              <img [src]="profileImage" 
+                   alt="Profile Picture"
+                   class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+            </div>
+            
+            <!-- Upload Button -->
+            <label for="file-upload" 
+                   class="absolute bottom-2 right-2 bg-indigo-600 text-white rounded-full p-3 cursor-pointer hover:bg-indigo-700 transform hover:scale-110 transition-all duration-200 shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+              </svg>
+              <input id="file-upload" 
+                     type="file" 
+                     accept="image/jpeg, image/png" 
+                     class="hidden" 
+                     (change)="onFileSelected($event)">
+            </label>
+          </div>
+          
+          <!-- Upload Button -->
+          <button *ngIf="selectedFile" 
+                  (click)="uploadProfilePicture()"
+                  [disabled]="isLoading"
+                  class="mt-4 px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all duration-200 shadow-lg font-medium">
+            <span *ngIf="!isLoading" class="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              Save Picture
+            </span>
+            <span *ngIf="isLoading" class="flex items-center">
+              <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Uploading...
+            </span>
+          </button>
+        </div>
+
+        <!-- Messages -->
+        <div class="mb-6">
+          <div *ngIf="errorMessage" 
+               class="mb-4 p-4 bg-red-50 border-l-4 border-red-400 text-red-700 rounded-r-lg flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+            {{ errorMessage }}
+          </div>
+          
+          <div *ngIf="successMessage" 
+               class="mb-4 p-4 bg-green-50 border-l-4 border-green-400 text-green-700 rounded-r-lg flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            {{ successMessage }}
+          </div>
+        </div>
+
+        <!-- User Information Cards -->
+        <div class="grid md:grid-cols-2 gap-6">
+          <!-- Username Card -->
+          <div class="group">
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100 hover:shadow-lg transition-all duration-300 hover:scale-105">
+              <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800">Username</h3>
+              </div>
+              <p class="text-2xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                {{ userData.username || 'Loading...' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Email Card -->
+          <div class="group">
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-100 hover:shadow-lg transition-all duration-300 hover:scale-105">
+              <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                  </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800">Email Address</h3>
+              </div>
+              <p class="text-2xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors break-all">
+                {{ userData.email || 'Loading...' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions Section -->
+        <div class="mt-8 pt-6 border-t border-gray-200">
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a routerLink="/reset-password" 
+               class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg font-medium">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+              </svg>
+              Change Password
+            </a>
+            
+            <button class="inline-flex items-center px-6 py-3 bg-white text-gray-700 border border-gray-300 rounded-full hover:bg-gray-50 transform hover:scale-105 transition-all duration-200 shadow-lg font-medium">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+              </svg>
+              Account Settings
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
