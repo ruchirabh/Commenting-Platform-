@@ -1,4 +1,3 @@
-// profile.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -15,7 +14,10 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 })
 export class ProfileComponent implements OnInit {
   profileImage: SafeUrl | string = 'assets/images/default-profile.png';
-  userData: any = {};
+  userData: any = {
+    username: '',
+    email: ''
+  };
   isLoading = false;
   errorMessage = '';
   successMessage = '';
@@ -27,19 +29,33 @@ export class ProfileComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadUserProfile();
+    this.loadUserData(); 
+    this.loadUserProfile(); 
+    this.loadProfilePicture();
+  }
+
+  loadUserData(): void {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        this.userData.username = user.username || '';
+        this.userData.email = user.email || '';
+      } catch (e) {
+        console.error('Error parsing user data:', e);
+      }
+    }
   }
 
   loadUserProfile(): void {
     this.isLoading = true;
     this.authService.getUserProfile().subscribe({
       next: (data) => {
-        this.userData = data;
-        this.loadProfilePicture();
+        this.userData = { ...this.userData, ...data };
+        this.isLoading = false;
       },
       error: (err) => {
-        this.errorMessage = 'Failed to load profile data';
-        console.error(err);
+        console.error('Failed to load profile:', err);
         this.isLoading = false;
       }
     });
@@ -50,11 +66,9 @@ export class ProfileComponent implements OnInit {
       next: (blob) => {
         const objectUrl = URL.createObjectURL(blob);
         this.profileImage = this.sanitizer.bypassSecurityTrustUrl(objectUrl);
-        this.isLoading = false;
       },
       error: () => {
         this.profileImage = 'assets/images/default-profile.png';
-        this.isLoading = false;
       }
     });
   }
@@ -62,7 +76,7 @@ export class ProfileComponent implements OnInit {
   onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      if (file.size > 5 * 1024 * 1024) {
         this.errorMessage = 'File size exceeds 5MB limit';
         return;
       }
@@ -72,7 +86,6 @@ export class ProfileComponent implements OnInit {
       }
       this.selectedFile = file;
       
-      // Preview the image
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.profileImage = this.sanitizer.bypassSecurityTrustUrl(e.target.result);
@@ -93,6 +106,8 @@ export class ProfileComponent implements OnInit {
         this.successMessage = 'Profile picture updated successfully';
         this.selectedFile = null;
         this.isLoading = false;
+        // Reload the profile picture
+        this.loadProfilePicture();
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to upload profile picture';

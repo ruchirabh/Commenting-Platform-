@@ -39,12 +39,16 @@ export class Auth {
   }
 
   uploadProfilePicture(file: File): Observable<any> {
-    const formData = new FormData();
-    formData.append('file', file);
-    return this.http.post(API_CONFIG.USER.PROFILE_PIC, formData);
-  }
+  const formData = new FormData();
+  formData.append('file', file);
 
-    getProfilePicture(userId?: string): Observable<Blob> {
+  const headers = this.getAuthHeaders(); 
+
+  return this.http.post(API_CONFIG.USER.PROFILE_PIC, formData, { headers });
+}
+
+
+  getProfilePicture(userId?: string): Observable<Blob> {
     const url = userId ? 
       `${API_CONFIG.USER.PROFILE_PIC}?user_id=${userId}` : 
       API_CONFIG.USER.PROFILE_PIC;
