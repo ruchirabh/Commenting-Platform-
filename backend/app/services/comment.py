@@ -28,13 +28,13 @@ class CommentService:
 
         result = await db.comments.insert_one(comment_dict)
 
-        # If this is a reply, increment parent's reply_count
+        
         if comment.parent_id:
             await db.comments.update_one(
                 {"_id": ObjectId(comment.parent_id)}, {"$inc": {"reply_count": 1}}
             )
 
-        # Update user's comment count
+        
         await db.users.update_one(
             {"_id": ObjectId(user_id)}, {"$inc": {"comment_count": 1}}
         )
@@ -56,7 +56,6 @@ class CommentService:
         if not comment:
             raise HTTPException(status_code=404, detail=messages.comment_not_found)
 
-        # Convert MongoDB document to CommentInDB
         comment["id"] = str(comment["_id"])
         del comment["_id"]
         if comment.get("parent_id"):
@@ -77,10 +76,10 @@ class CommentService:
         else:
             query["parent_id"] = None
 
-        # Sort by created_at in descending order (newest first)
+        
         comments = (
             await db.comments.find(query)
-            .sort("created_at", -1)  # -1 = descending order
+            .sort("created_at", -1)  
             .skip(skip)
             .limit(limit)
             .to_list(None)
